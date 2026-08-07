@@ -1,7 +1,7 @@
 package com.products.ws.service;
 
+import com.example.core.ProductCreatedEvent;
 import com.products.ws.rest.CreateProductRestModel;
-import com.products.ws.rest.ProductCreatedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
