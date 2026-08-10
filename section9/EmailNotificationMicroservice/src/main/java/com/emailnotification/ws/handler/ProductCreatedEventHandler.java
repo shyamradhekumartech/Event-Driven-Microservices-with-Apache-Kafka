@@ -8,7 +8,8 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
 @Component
-@KafkaListener(topics = {"product-created-events-topic"})
+// Explicitly link the containerFactory bean here
+@KafkaListener(topics = {"product-created-events-topic"}, containerFactory = "kafkaListenerContainerFactory")
 public class ProductCreatedEventHandler {
 
     private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
@@ -18,4 +19,9 @@ public class ProductCreatedEventHandler {
         LOGGER.info("Received a new event: " + productCreatedEvent.getTitle());
     }
 
+    // Fallback handler if a message still arrives parsed incorrectly as String
+    @KafkaHandler(isDefault = true)
+    public void handleDefault(Object unmappedMessage) {
+        LOGGER.warn("Received unmapped message payload structure: " + unmappedMessage.toString());
+    }
 }

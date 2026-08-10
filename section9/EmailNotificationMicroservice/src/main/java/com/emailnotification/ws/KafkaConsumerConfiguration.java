@@ -24,12 +24,21 @@ public class KafkaConsumerConfiguration {
     public ConsumerFactory<String, Object> consumerFactory() {
         Map<String, Object> config = new HashMap<>();
         config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, environment.getProperty("spring.kafka.consumer.bootstrap-server"));
-        config.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        config.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
         config.put(ConsumerConfig.GROUP_ID_CONFIG, environment.getProperty("spring.kafka.consumer.group-id"));
-        config.put(JsonDeserializer.TRUSTED_PACKAGES, environment.getProperty("spring.kafka.consumer.properties.spring.json.trusted.packages"));
 
-        return new DefaultKafkaConsumerFactory<>(config);
+        // Setup String Deserializer for Key
+        StringDeserializer keyDeserializer = new StringDeserializer();
+
+        // Setup Json Deserializer for Value with specific fallback target type
+        JsonDeserializer<Object> valueDeserializer = new JsonDeserializer<>();
+        // Tell the deserializer explicitly to trust these packages
+        valueDeserializer.addTrustedPackages("com.example.core", "com.emailnotification.ws");
+
+        // OPTIONAL CRITICAL FIX: If the producer's package structure for ProductCreatedEvent
+        // does not match the consumer's package structure, explicitly map the type header like this:
+        // valueDeserializer. some type mappings if packages differ...
+
+        return new DefaultKafkaConsumerFactory<>(config, keyDeserializer, valueDeserializer);
     }
 
     @Bean
